@@ -11,6 +11,10 @@
   <p align="center">
     <a href="https://arxiv.org/abs/2410.03097"><img alt='arXiv' src="https://img.shields.io/badge/arXiv-2404.03097-b31b1b.svg"></a>
   </p>
+  <div align="center">
+   <img src="./assets/intro_fig.png">
+     <img src="./assets/pipeline.png", width="88%">
+  </div>
 <!--   <div align="center">
     <img src="./image/GIF/robot-noise.gif", width="23%">
     <img src="./image/GIF/robot-diffusion.gif", width="23%">
@@ -76,11 +80,9 @@ Basically, it consists of the following steps:
 ## More result
 <a id="more reault">
 <div align="center">
-    <img src="./image/image2.png", width="90%">
-    <img src="./image/image1.png", width="90%">
-    <img src="./image/image3.png", width="90%">
-    <img src="./image/image4.png", width="90%">
-    <img src="./image/image5.png", width="90%">
+    <img src="./assets/main_res.png", width="90%">
+    <img src="./assets/examples.png", width="90%">
+
   </div>
 </a>
 
@@ -107,6 +109,7 @@ This work is inspired by the amazing [DragGAN](https://vcai.mpi-inf.mpg.de/proje
 ## Related Links
 * [Drag Your GAN: Interactive Point-based Manipulation on the Generative Image Manifold](https://vcai.mpi-inf.mpg.de/projects/DragGAN/)
 * [DragDiffusion: Harnessing Diffusion Models for Interactive Point-based Image Editing](https://github.com/Yujun-Shi/DragDiffusion)
+* [Prompt-aligned Gradient for Prompt Tuning](https://openaccess.thecvf.com/content/ICCV2023/html/Zhu_Prompt-aligned_Gradient_for_Prompt_Tuning_ICCV_2023_paper.html)
 
 
 
