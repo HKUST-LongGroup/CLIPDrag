@@ -45,6 +45,11 @@
   </div> -->
 </p>
 
+
+## TODO
+- [x] update main structure
+-  update CLIPDrag part
+-  improve GUI part
 ## News and Update
 * [Feb 9th] v1.0.0 Release.
 
