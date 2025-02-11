@@ -62,6 +62,7 @@ To install the required libraries, simply run the following command:
 conda env create -f environment.yaml
 conda activate clipdrag
 ```
+f this takes too long, ```conda config --set solver libmamba ``` sets conda to use the libmamba solver and could speed up installation.
 
 ## Run DragNoise
 To start with, in command line, run the following to start the gradio user interface:
