@@ -216,7 +216,7 @@ class SDFeaturizer:
             unet_ft: a torch tensor in the shape of [1, c, h, w]
         '''
         img_tensor = img_tensor.repeat(ensemble_size, 1, 1, 1).cuda() # ensem, c, h, w
-        prompt_embeds = self.pipe._encode_prompt(
+        prompt_embeds,_ = self.pipe.encode_prompt(
             prompt=prompt,
             device='cuda',
             num_images_per_prompt=1,

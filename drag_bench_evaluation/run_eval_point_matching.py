@@ -51,10 +51,10 @@ if __name__ == '__main__':
         'building_countryside_view',
         'animals',
         'human_head',
-        'human_upper_body',
-        'human_full_body',
-        'interior_design',
-        'other_objects',
+        # 'human_upper_body',
+        # 'human_full_body',
+        # 'interior_design',
+        # 'other_objects',
     ]
 
     original_img_root = 'drag_bench_data/'
@@ -65,6 +65,7 @@ if __name__ == '__main__':
 
         all_dist = []
         for cat in all_category:
+            cat_dist = []
             for file_name in os.listdir(os.path.join(original_img_root, cat)):
                 if file_name == '.DS_Store':
                     continue
@@ -95,7 +96,6 @@ if __name__ == '__main__':
                 dragged_image_tensor = (PILToTensor()(dragged_image_PIL) / 255.0 - 0.5) * 2
 
                 _, H, W = source_image_tensor.shape
-
                 ft_source = dift.forward(source_image_tensor,
                       prompt=prompt,
                       t=261,
@@ -123,5 +123,7 @@ if __name__ == '__main__':
                     # calculate distance
                     dist = (tp - torch.tensor(max_rc)).float().norm()
                     all_dist.append(dist)
+                    cat_dist.append(dist)
+            print(f'Mean Distance for {cat:<30} : {torch.tensor(cat_dist).mean().item()}')   
 
         print(target_root + ' mean distance: ', torch.tensor(all_dist).mean().item())

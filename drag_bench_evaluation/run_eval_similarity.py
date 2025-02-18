@@ -59,10 +59,10 @@ if __name__ == '__main__':
         'building_countryside_view',
         'animals',
         'human_head',
-        'human_upper_body',
-        'human_full_body',
-        'interior_design',
-        'other_objects',
+        # 'human_upper_body',
+        # 'human_full_body',
+        # 'interior_design',
+        # 'other_objects',
     ]
 
     original_img_root = 'drag_bench_data/'
@@ -71,7 +71,9 @@ if __name__ == '__main__':
         all_lpips = []
         all_clip_sim = []
         for cat in all_category:
+            cat_lpips = []
             for file_name in os.listdir(os.path.join(original_img_root, cat)):
+                
                 if file_name == '.DS_Store':
                     continue
                 source_image_path = os.path.join(original_img_root, cat, file_name, 'original_image.png')
@@ -90,6 +92,8 @@ if __name__ == '__main__':
                     dragged_image_224x224 = F.interpolate(dragged_image, (224,224), mode='bilinear')
                     cur_lpips = loss_fn_alex(source_image_224x224, dragged_image_224x224)
                     all_lpips.append(cur_lpips.item())
+                    cat_lpips.append(cur_lpips.item())
+                
 
                 # compute CLIP similarity
                 source_image_clip = clip_preprocess(source_image_PIL).unsqueeze(0).to(device)
@@ -102,6 +106,7 @@ if __name__ == '__main__':
                     dragged_feature /= dragged_feature.norm(dim=-1, keepdim=True)
                     cur_clip_sim = (source_feature * dragged_feature).sum()
                     all_clip_sim.append(cur_clip_sim.cpu().numpy())
+            print(f'1-LIPIS for {cat:<30} : {1-np.mean(cat_lpips)}')
         print(target_root)
         print('avg lpips: ', np.mean(all_lpips))
         print('avg clip sim', np.mean(all_clip_sim))

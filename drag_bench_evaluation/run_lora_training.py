@@ -72,7 +72,7 @@ if __name__ == '__main__':
             source_image = Image.open(os.path.join(sample_path, 'original_image.png'))
             source_image = np.array(source_image)
 
-            # load meta data
+            # load meta data: 'prompt': str; points: [[x1,y1],[x2,y2]....], mask:  512x512 bool numpy array
             with open(os.path.join(sample_path, 'meta_data.pkl'), 'rb') as f:
                 meta_data = pickle.load(f)
             prompt = meta_data['prompt']

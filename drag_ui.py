@@ -20,12 +20,13 @@ import os
 import gradio as gr
 
 from utils.ui_utils import get_points, undo_points
-from utils.ui_utils import clear_all, store_img, train_lora_interface, run_drag
+from utils.ui_utils import clear_all, store_img, train_lora_interface, run_drag, run_drag_final
 from utils.ui_utils import clear_all_gen, store_img_gen, gen_img, run_drag_gen
 
 LENGTH=480 # length of the square area displaying/editing images
 
 with gr.Blocks() as demo:
+    # import debugpy; debugpy.connect(("localhost",5678))
     # layout definition
     with gr.Row():
         gr.Markdown("""
@@ -59,6 +60,7 @@ with gr.Blocks() as demo:
         # general parameters
         with gr.Row():
             prompt = gr.Textbox(label="Prompt")
+            clip_prompt = gr.Textbox(label="Clip Prompt")
             lora_path = gr.Textbox(value="./lora_tmp", label="LoRA path")
             lora_status_bar = gr.Textbox(label="display LoRA training status")
 
@@ -70,7 +72,7 @@ with gr.Blocks() as demo:
                     label="number of pixel steps",
                     info="Number of gradient descent (motion supervision) steps on latent.",
                     precision=0)
-                lam = gr.Number(value=0.1, label="lam", info="regularization strength on unmasked areas")
+                lam = gr.Number(value=0.1, label="fusion strength", info="regularization strength on unmasked areas")
                 # n_actual_inference_step = gr.Number(value=40, label="optimize latent step", precision=0)
                 inversion_strength = gr.Slider(0, 1.0,
                     value=0.7,
@@ -249,12 +251,26 @@ with gr.Blocks() as demo:
         lora_rank],
         [lora_status_bar]
     )
+    #            Method | Description
+    #       run_drag    : drag diffusion pipeline
+    #       run_drag_A  : Clip Guidance between 50-35 step, and drag on 35-th step
+    #       run_drag_B  : Add 2 loss and update on 35-th step.
+    #       run_drag_C  : like B, but use ProGrad to combine 2 loss.
+    #       run_drag_C1 : like E1 with respect to E.
+    #       run_drag_C2 :  similar to C1, but integrate clip prompt into UI.
+    #       run_drag_D  : based on run_drag, without clip guidance, but motion supervision from 50-35 step
+    #       run_drag_E  : based on run_drag_D, adding clip guidance(proGrad) to each motion update.
+    #       run_drag_E1 : a refinement of Method E ---- Using Adam Optimizer to update init code. 
+    #       run_drag_F  : good_drag pipeline
+    #       run_drag_final : final method: (1) use original features as template, (2) revise promptGrad (3) sample potential area towards target
+    
     run_button.click(
-        run_drag,
+        run_drag_final,
         [original_image,
         input_image,
         mask,
         prompt,
+        # clip_prompt,
         selected_points,
         inversion_strength,
         lam,
