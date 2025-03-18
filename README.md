@@ -47,10 +47,9 @@
 
 
 ## TODO
-- [x] update main structure
--  update CLIPDrag part
 -  improve GUI part
 ## News and Update
+* [Mar 18th] v2.0.0 Release.
 * [Feb 9th] v1.0.0 Release.
 
 ## Installation
@@ -62,9 +61,11 @@ To install the required libraries, simply run the following command:
 conda env create -f environment.yaml
 conda activate clipdrag
 ```
-f this takes too long, ```conda config --set solver libmamba ``` sets conda to use the libmamba solver and could speed up installation.
+If this takes too long, ```conda config --set solver libmamba ``` sets conda to use the libmamba solver and could speed up installation. 
 
-## Run DragNoise
+Make sure your gradio version is 3.50.2 if an error occurs in the GUI interface.
+
+## Run CLIPDrag
 To start with, in command line, run the following to start the gradio user interface:
 ```
 python3 drag_ui.py

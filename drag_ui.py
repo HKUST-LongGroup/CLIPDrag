@@ -18,9 +18,9 @@
 
 import os
 import gradio as gr
-
+from utils.lora_utils import train_lora
 from utils.ui_utils import get_points, undo_points
-from utils.ui_utils import clear_all, store_img, train_lora_interface, run_drag, run_drag_final
+from utils.ui_utils import clear_all, store_img, train_lora_interface, run_drag
 from utils.ui_utils import clear_all_gen, store_img_gen, gen_img, run_drag_gen
 
 LENGTH=480 # length of the square area displaying/editing images
@@ -30,7 +30,7 @@ with gr.Blocks() as demo:
     # layout definition
     with gr.Row():
         gr.Markdown("""
-        # Official Implementation of [DragDiffusion](https://arxiv.org/abs/2306.14435)
+        # Official Implementation of [CLIPDrag](https://arxiv.org/abs/2410.03097)
         """)
 
     # UI components for editing real images
@@ -251,21 +251,10 @@ with gr.Blocks() as demo:
         lora_rank],
         [lora_status_bar]
     )
-    #            Method | Description
-    #       run_drag    : drag diffusion pipeline
-    #       run_drag_A  : Clip Guidance between 50-35 step, and drag on 35-th step
-    #       run_drag_B  : Add 2 loss and update on 35-th step.
-    #       run_drag_C  : like B, but use ProGrad to combine 2 loss.
-    #       run_drag_C1 : like E1 with respect to E.
-    #       run_drag_C2 :  similar to C1, but integrate clip prompt into UI.
-    #       run_drag_D  : based on run_drag, without clip guidance, but motion supervision from 50-35 step
-    #       run_drag_E  : based on run_drag_D, adding clip guidance(proGrad) to each motion update.
-    #       run_drag_E1 : a refinement of Method E ---- Using Adam Optimizer to update init code. 
-    #       run_drag_F  : good_drag pipeline
-    #       run_drag_final : final method: (1) use original features as template, (2) revise promptGrad (3) sample potential area towards target
+   
     
     run_button.click(
-        run_drag_final,
+        run_drag,
         [original_image,
         input_image,
         mask,
