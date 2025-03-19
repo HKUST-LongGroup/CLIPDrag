@@ -138,7 +138,6 @@ def drag_diffusion_update(model,
     handle_points_init = copy.deepcopy(handle_points)
     interp_mask = F.interpolate(mask, (init_code.shape[2],init_code.shape[3]), mode='nearest')
     using_mask = interp_mask.sum() != 0.0
-
     # prepare amp scaler for mixed-precision training
     scaler = torch.cuda.amp.GradScaler()
     for step_idx in range(args.n_pix_step):
@@ -193,8 +192,8 @@ def drag_diffusion_update(model,
                     loss += ((2*args.r_m+1)**2)*F.l1_loss(f0_patch, f1_patch)
 
             # masked region must stay unchanged
-            # if using_mask:
-            loss += args.lam * ((x_prev_updated-x_prev_0)*(1.0-interp_mask)).abs().sum()
+            if using_mask:
+                loss += args.lam * ((x_prev_updated-x_prev_0)*(1.0-interp_mask)).abs().sum()
             # loss += args.lam * ((init_code_orig-init_code)*(1.0-interp_mask)).abs().sum()
             ######################################### clip guidance part ####################################
             def cal_global_grad(init_code,args):
@@ -219,16 +218,15 @@ def drag_diffusion_update(model,
                 aug_img = image_aug(pred_image).add(1).div(2)
 
                 clip_img = clip_normalize(aug_img)    
-                # import pdb;pdb.set_trace()
-                print(f'prompt for finetune is :{args.prompt}')
-                prompt = args.prompt
-                prompt = clip.tokenize(prompt).to(device)
+                print(f'prompt for finetune is :{args.drag_prompt}')
+                lora_prompt = args.drag_prompt
+                lora_prompt = clip.tokenize(lora_prompt).to(device)
                 image_features = clip_model.encode_image(clip_img)
-                text_features = clip_model.encode_text(prompt)
+                text_features = clip_model.encode_text(lora_prompt)
                 x = F.normalize(image_features,dim=-1)
                 y = F.normalize(text_features,dim=-1)
                 clip_loss = 1-(x@y.t()).squeeze()
-                clip_loss =300*clip_loss
+                clip_loss =args.clip_loss_coef*clip_loss
                 print(f'clip loss:{clip_loss}')
                 grad_global = torch.autograd.grad(clip_loss,z)[0]
                 del pred_image,clip_img,aug_img,image_features,text_features
@@ -236,25 +234,26 @@ def drag_diffusion_update(model,
                 # grad_global = init_code.grad
                 # optimizer.zero_grad()
                 return grad_global
-    
-            grad_global = cal_global_grad(init_code,args)
+            
+            if args.drag_prompt != "":
+                grad_global = cal_global_grad(init_code,args)
 
             #################################################################################################
-            print('loss total=%f'%(loss.item()))
-            loss.backward()
-            grad_direction = init_code.grad
-        cosine = torch.cosine_similarity(grad_global.view(1,-1),grad_direction.view(1,-1))
-        sine = (1-cosine**2)**0.5
-        print(f'cosine between two gradients:{cosine}')
-        pro_lambda=args.fuse_cof
-        print(f'prompt lambda for global local fuse:{pro_lambda}')
-        if cosine >=0:
-            grad_prompt = grad_direction + pro_lambda*sine*grad_global
-        else:
-            
-            grad_prompt = grad_direction + pro_lambda*cosine*grad_global   
+                print('loss total=%f'%(loss.item()))
+                loss.backward()
+                grad_direction = init_code.grad
+                cosine = torch.cosine_similarity(grad_global.view(1,-1),grad_direction.view(1,-1))
+                sine = (1-cosine**2)**0.5
+                print(f'cosine between two gradients:{cosine}')
+                pro_lambda=args.fuse_cof 
+                print(f'prompt lambda for global local fuse:{pro_lambda}')
+                if cosine >=0:
+                    grad_prompt = grad_direction + pro_lambda*sine*grad_global
+                else:
+                    grad_prompt = grad_direction + pro_lambda*cosine*grad_global   
+            # grad_prompt = grad_direction + pro_lambda*cosine*grad_global   
   
-        init_code.grad = grad_prompt
+                init_code.grad = grad_prompt
 
         optimizer.step()
 
@@ -343,7 +342,7 @@ def drag_diffusion_update_gen(model,
 
             # do point tracking to update handle points before computing motion supervision loss
             if step_idx != 0:
-                handle_points = point_tracking(F0, F1, handle_points, handle_points_init, args)
+                handle_points = fast_point_tracking(F0, F1, handle_points, handle_points_init, args)
                 print('new handle points', handle_points)
 
             # break if all handle points have reached the targets

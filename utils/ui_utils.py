@@ -174,10 +174,11 @@ def preprocess_image(image,
 def run_drag(source_image,
              image_with_clicks,
              mask,
-             prompt,
+             lora_prompt,
+             drag_prompt,
              points,
              inversion_strength,
-             lam,
+             fuse_cof,
              latent_lr,
              n_pix_step,
              model_path,
@@ -214,12 +215,13 @@ def run_drag(source_image,
 
 
     args = SimpleNamespace()
-    args.prompt = prompt
+    args.lora_prompt = lora_prompt
+    args.drag_prompt = drag_prompt if drag_prompt != "" else lora_prompt 
     args.points = points
     args.n_inference_step = 50
     args.n_actual_inference_step = round(inversion_strength * args.n_inference_step)
     args.guidance_scale = 1.0
-
+    args.clip_loss_coef = 100
     args.unet_feature_idx = [3]
 
     # setting in DragDiff
@@ -232,7 +234,7 @@ def run_drag(source_image,
     args.lam = 0.1
 
     args.lr = latent_lr
-    args.fuse_cof = lam
+    args.fuse_cof = fuse_cof
     args.n_pix_step = n_pix_step
 
     full_h, full_w = source_image.shape[:2]
@@ -272,12 +274,12 @@ def run_drag(source_image,
         model.unet.load_attn_procs(lora_path)
 
     # obtain text embeddings
-    text_embeddings = model.get_text_embeddings(prompt)
+    text_embeddings = model.get_text_embeddings(lora_prompt)
 
     # invert the source image
     # the latent code resolution is too small, only 64*64
     invert_code = model.invert(source_image,
-                               prompt,
+                               lora_prompt,
                                encoder_hidden_states=text_embeddings,
                                guidance_scale=args.guidance_scale,
                                num_inference_steps=args.n_inference_step,
@@ -328,7 +330,7 @@ def run_drag(source_image,
 
     # inference the synthesized image
     gen_image = model(
-        prompt=args.prompt,
+        prompt=args.drag_prompt,
         encoder_hidden_states=torch.cat([text_embeddings]*2, dim=0),
         batch_size=2,
         latents=torch.cat([init_code_orig, updated_init_code], dim=0),

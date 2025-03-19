@@ -59,8 +59,8 @@ with gr.Blocks() as demo:
 
         # general parameters
         with gr.Row():
-            prompt = gr.Textbox(label="Prompt")
-            clip_prompt = gr.Textbox(label="Clip Prompt")
+            lora_prompt = gr.Textbox(label="Lora Prompt",info="Keep empty if you want to use LLM to generate prompt")
+            drag_prompt = gr.Textbox(label="Drag Prompt",info="Keep empty if no need for ambiguity elimination.")
             lora_path = gr.Textbox(value="./lora_tmp", label="LoRA path")
             lora_status_bar = gr.Textbox(label="display LoRA training status")
 
@@ -72,7 +72,7 @@ with gr.Blocks() as demo:
                     label="number of pixel steps",
                     info="Number of gradient descent (motion supervision) steps on latent.",
                     precision=0)
-                lam = gr.Number(value=0.1, label="fusion strength", info="regularization strength on unmasked areas")
+                fuse_cof = gr.Number(value=0.1, label="fusion strength", info="fusion strength between global and local gradients")
                 # n_actual_inference_step = gr.Number(value=40, label="optimize latent step", precision=0)
                 inversion_strength = gr.Slider(0, 1.0,
                     value=0.7,
@@ -241,7 +241,7 @@ with gr.Blocks() as demo:
     train_lora_button.click(
         train_lora_interface,
         [original_image,
-        prompt,
+        lora_prompt,
         model_path,
         vae_path,
         lora_path,
@@ -258,11 +258,11 @@ with gr.Blocks() as demo:
         [original_image,
         input_image,
         mask,
-        prompt,
-        # clip_prompt,
+        lora_prompt,
+        drag_prompt,
         selected_points,
         inversion_strength,
-        lam,
+        fuse_cof,
         latent_lr,
         n_pix_step,
         model_path,
