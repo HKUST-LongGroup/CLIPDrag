@@ -80,7 +80,7 @@ Basically, it consists of the following steps:
 #### 2) do "drag" editing
 * Draw a mask in the left-most box to specify the editable areas. (optional)
 * Click handle and target points in the middle box. Also, you may reset all points by clicking "Undo point".
-* Input a prompt describing the desired edit in the "drag prompt" field.(You can keep this empty if ambiguity elimination. In this situation, CLIPDrag will use  lora prompt to enhance the edit. )
+* Input a prompt describing the desired edit in the "drag prompt" field.(You can keep this empty if no need for ambiguity elimination. In this situation, CLIPDrag will use  lora prompt to enhance the edit. )
 * Click the "Run" button to run our algorithm. Edited results will be displayed in the right-most box.
 
 
