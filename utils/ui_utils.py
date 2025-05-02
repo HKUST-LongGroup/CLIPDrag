@@ -221,7 +221,7 @@ def run_drag(source_image,
     args.n_inference_step = 50
     args.n_actual_inference_step = round(inversion_strength * args.n_inference_step)
     args.guidance_scale = 1.0
-    args.clip_loss_coef = 100
+    args.clip_loss_coef = 300
     args.unet_feature_idx = [3]
 
     # setting in DragDiff
@@ -229,8 +229,8 @@ def run_drag(source_image,
     # args.r_p = 3
 
     # # setting in GoodDrag
-    args.r_m = 4
-    args.r_p = 12
+    args.r_m = 2
+    args.r_p = 2
     args.lam = 0.1
 
     args.lr = latent_lr

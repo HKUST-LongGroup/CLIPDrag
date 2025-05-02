@@ -68,11 +68,11 @@ with gr.Blocks() as demo:
         with gr.Tab("Drag Config"):
             with gr.Row():
                 n_pix_step = gr.Number(
-                    value=80,
+                    value=800,
                     label="number of pixel steps",
                     info="Number of gradient descent (motion supervision) steps on latent.",
                     precision=0)
-                fuse_cof = gr.Number(value=0.1, label="fusion strength", info="fusion strength between global and local gradients")
+                fuse_cof = gr.Number(value=0.7, label="fusion strength", info="fusion strength between global and local gradients")
                 # n_actual_inference_step = gr.Number(value=40, label="optimize latent step", precision=0)
                 inversion_strength = gr.Slider(0, 1.0,
                     value=0.7,
