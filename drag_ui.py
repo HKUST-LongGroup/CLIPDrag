@@ -15,15 +15,44 @@
 # See the License for the specific language governing permissions and 
 # limitations under the License. 
 # *************************************************************************
-
 import os
+import requests
+import io
 import gradio as gr
+from PIL import Image
+import numpy as np
+
 from utils.lora_utils import train_lora
 from utils.ui_utils import get_points, undo_points
 from utils.ui_utils import clear_all, store_img, train_lora_interface, run_drag
 from utils.ui_utils import clear_all_gen, store_img_gen, gen_img, run_drag_gen
-
 LENGTH=480 # length of the square area displaying/editing images
+
+# import google.generativeai as genai
+# genai.configure(api_key="AIzaSyDDU8m4qDPktYWIurm9p4qBN_PiHrAJ6vc")  # https://ai.google.dev/ 
+
+# model = genai.GenerativeModel('gemini-pro-vision')
+# def get_image_caption_from_llm(image):
+#     """
+#     Sends a PIL.Image object to the Hugging Face Inference API to get a caption.
+
+#     Args:
+#         pil_image_object: A PIL.Image object to be captioned.
+
+#     Returns:
+#         A string containing the caption, or None if an error occurs.
+#     """
+#     pil_image_object = Image.fromarray(image)
+#     response = model.generate_content(["please describe this image in one sentence", image])
+    
+#     caption = response.text
+#     return caption
+    
+  
+
+   
+
+
 
 with gr.Blocks() as demo:
     # import debugpy; debugpy.connect(("localhost",5678))
@@ -49,6 +78,8 @@ with gr.Blocks() as demo:
                 input_image = gr.Image(type="numpy", label="Click Points",
                     show_label=True, height=LENGTH, width=LENGTH, interactive=False) # for points clicking
                 undo_button = gr.Button("Undo point")
+              
+        
             with gr.Column():
                 gr.Markdown("""<p style="text-align: center; font-size: 20px">Editing Results</p>""")
                 output_image = gr.Image(type="numpy", label="Editing Results",
@@ -56,6 +87,7 @@ with gr.Blocks() as demo:
                 with gr.Row():
                     run_button = gr.Button("Run")
                     clear_all_button = gr.Button("Clear All")
+        ############################### generate caption ###############################
 
         # general parameters
         with gr.Row():
@@ -63,7 +95,11 @@ with gr.Blocks() as demo:
             drag_prompt = gr.Textbox(label="Drag Prompt",info="Keep empty if no need for ambiguity elimination.")
             lora_path = gr.Textbox(value="./lora_tmp", label="LoRA path")
             lora_status_bar = gr.Textbox(label="display LoRA training status")
-
+            # input_image.change(
+            #         fn=get_image_caption_from_llm,
+            #         inputs=input_image,
+            #         outputs=lora_prompt,
+            #                 )
         # algorithm specific parameters
         with gr.Tab("Drag Config"):
             with gr.Row():
@@ -73,6 +109,8 @@ with gr.Blocks() as demo:
                     info="Number of gradient descent (motion supervision) steps on latent.",
                     precision=0)
                 fuse_cof = gr.Number(value=0.7, label="fusion strength", info="fusion strength between global and local gradients")
+                r_m = gr.Number(value=1, label="r_m", info="radius of the patch in  motion supervision                           ")
+                r_p = gr.Number(value=3, label="r_p", info="radius of the patch in  point tracking                               ")
                 # n_actual_inference_step = gr.Number(value=40, label="optimize latent step", precision=0)
                 inversion_strength = gr.Slider(0, 1.0,
                     value=0.7,
@@ -221,6 +259,7 @@ with gr.Blocks() as demo:
                 start_step_gen = gr.Number(value=0, label="start_step", precision=0, visible=False)
                 start_layer_gen = gr.Number(value=10, label="start_layer", precision=0, visible=False)
 
+ 
     # event definition
     # event for dragging user-input real image
     canvas.edit(
@@ -265,6 +304,8 @@ with gr.Blocks() as demo:
         fuse_cof,
         latent_lr,
         n_pix_step,
+        r_m,
+        r_p,
         model_path,
         vae_path,
         lora_path,

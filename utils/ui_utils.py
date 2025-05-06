@@ -42,7 +42,6 @@ from .drag_utils import drag_diffusion_update_gen,drag_diffusion_update
 from .attn_utils import register_attention_editor_diffusers, MutualSelfAttentionControl
 from .freeu_utils import register_free_upblock2d, register_free_crossattn_upblock2d
 
-
 # -------------- general UI functionality --------------
 def clear_all(length=480):
     return gr.Image.update(value=None, height=length, width=length, interactive=True), \
@@ -181,6 +180,8 @@ def run_drag(source_image,
              fuse_cof,
              latent_lr,
              n_pix_step,
+             r_m,
+             r_p,
              model_path,
              vae_path,
              lora_path,
@@ -229,8 +230,8 @@ def run_drag(source_image,
     # args.r_p = 3
 
     # # setting in GoodDrag
-    args.r_m = 2
-    args.r_p = 2
+    args.r_m = int(r_m)
+    args.r_p = int(r_p)
     args.lam = 0.1
 
     args.lr = latent_lr
